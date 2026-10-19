@@ -140,6 +140,10 @@ table.sc td button{width:30px;height:30px;display:inline-grid;place-items:center
 .layout{position:relative;border-radius:12px;overflow:hidden;background:#fff;border:1px solid var(--line)}
 .layout img{display:block;width:100%;height:auto}
 .layout .ring{position:absolute;width:13%;aspect-ratio:1;max-width:100%;border:3px solid var(--flag);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(255,255,255,.85);pointer-events:none}
+.hlab{display:inline-block;transform:translate(-50%,-50%);background:rgba(16,32,26,.8);color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;line-height:20px;text-align:center;border-radius:50%}
+.inset{float:right;position:relative;width:110px;margin:0 0 4px 10px;border-radius:8px;overflow:hidden;background:#fff}
+.inset img{display:block;width:100%}
+.inset i{position:absolute;width:20px;height:20px;border:2px solid var(--flag);border-radius:50%;transform:translate(-50%,-50%)}
 #toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(var(--sat) + 74px);z-index:1000;background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:12px;font-weight:600;font-size:14px;max-width:calc(100% - 32px);text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.35)}
 @media (prefers-reduced-motion:no-preference){#sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}}
 </style>
@@ -202,7 +206,10 @@ const CARD = [ // par, stroke index, card length (m)
   [3,13,144],[4,5,375],[4,7,348],[4,11,305],[4,9,338],[5,1,445],[3,17,115],[4,3,390],[3,15,152]
 ];
 const BBOX = "-34.505,150.770,-34.440,150.840";      // search box around Kembla Grange
-const HOME = [-34.475, 150.805];                      // fallback view before course data loads
+const HOME = [-34.4767, 150.8075];                    // fallback view before course data loads
+// Built-in tee and green-centre positions, [lat, lng]. Filled from the guided "Map the course" pass,
+// so every hole line is drawn the moment the app opens. Your own edits on the phone still override these.
+const PRESET = {};
 const OVERPASS = ["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
 const KEY = "grange.v1";
 
@@ -240,7 +247,7 @@ const u = () => S.units;
 
 /* ---------- hole model: OSM data, then card seed, then your own edits on top ---------- */
 function hole(h){
-  const base = (S.course && S.course.holes && S.course.holes[h]) || {};
+  const base = Object.assign({}, (S.course && S.course.holes && S.course.holes[h]) || {}, PRESET[h] || {});
   const c = CARD[h-1], o = S.overrides[h] || {};
   return {
     par: o.par ?? c[0], si: o.si ?? c[1], len: o.len ?? c[2],
@@ -346,7 +353,14 @@ function render(fit){
   $("#hNum").textContent = cur;
   $("#hMeta").textContent = `Par ${H.par} · Index ${H.si} · ${fmt(H.len)}${u()}`;
   holeLayer.clearLayers();
-  if(H.line) L.polyline(H.line, {color:"#fff", weight:2, opacity:.55, dashArray:"4 7", interactive:false}).addTo(holeLayer);
+  // every hole's routing line, like the club map; the current hole is drawn strongest
+  for(let h=1; h<=18; h++){
+    if(h===cur) continue; const O = hole(h); if(!(O.tee && O.gC)) continue;
+    const ln = (O.line && O.line.length>1) ? O.line : [O.tee, O.gC];
+    L.polyline(ln, {color:"#fff", weight:1.5, opacity:.4, interactive:false}).addTo(holeLayer);
+    L.marker(O.tee, {icon:L.divIcon({className:"", html:`<span class="hlab">${h}</span>`, iconSize:null}), interactive:false, keyboard:false}).addTo(holeLayer);
+  }
+  if(H.tee && H.gC) L.polyline((H.line && H.line.length>1) ? H.line : [H.tee, H.gC], {color:"#fff", weight:2.5, opacity:.9, interactive:false}).addTo(holeLayer);
   if(H.tee) L.marker(H.tee, {icon:icon("teem"), interactive:false}).addTo(holeLayer);
   [H.gF, H.gB].forEach(p => p && L.circleMarker(p, {radius:4, color:"#fff", weight:2, fillColor:"#10201A", fillOpacity:1, interactive:false}).addTo(holeLayer));
   if(H.gC) L.marker(H.gC, {icon:icon("flag"), interactive:false}).addTo(holeLayer);
@@ -455,6 +469,7 @@ document.addEventListener("click", e => {
 /* ---------- map taps ---------- */
 map.on("click", e => {
   const ll = [e.latlng.lat, e.latlng.lng];
+  if(walk){ walkTap(ll); return; }
   if(editing){ assignSheet(ll); return; }
   if(mode==="measure"){ target = ll; renderMeasure(); }
   else if(mode==="note"){ noteSheet(ll); }
@@ -690,6 +705,41 @@ function layoutSheet(){
     on(root, "[data-a]", e => { cur = ((cur-1+(e.currentTarget.dataset.a==="next"?1:-1)+18)%18)+1; target=null; render(true); layoutSheet(); });
   });
 }
+
+/* ---------- guided mapping: tee, then green centre, for holes 1 to 18 ---------- */
+let walk = null; // {want:"tee"|"gC", history:[{h,key,prev}]}
+function startWalk(){
+  editing = false; setMode("measure"); target = null; renderMeasure();
+  walk = {want:"tee", history:[]};
+  cur = 1; render(true); walkPrompt();
+}
+function walkPrompt(){
+  const p = MAP_POS[cur];
+  const inset = `<span class="inset"><img src="${MAP_IMG}" alt="">${p?`<i style="left:${p[0]*100}%;top:${p[1]*100}%"></i>`:""}</span>`;
+  showBanner("", [["Undo",walkUndo],["Skip",walkSkip],["Finish",stopWalk,true]]);
+  $("#bannerMsg").innerHTML = `${inset}<b>Hole ${cur} of 18</b><br>Tap the ${walk.want==="tee"?"<b>tee</b> (the tee you play from)":"<b>middle of the green</b>"}. Zoom in for accuracy.`;
+}
+function walkTap(ll){
+  const o = S.overrides[cur] || (S.overrides[cur] = {});
+  walk.history.push({h:cur, key:walk.want, prev:o[walk.want]});
+  o[walk.want] = ll; save();
+  if(walk.want==="tee"){ walk.want = "gC"; render(false); }
+  else { walk.want = "tee"; if(cur===18){ render(false); stopWalk(); return; } cur++; render(true); }
+  walkPrompt();
+}
+function walkUndo(){
+  const last = walk.history.pop(); if(!last) return;
+  const o = S.overrides[last.h] || (S.overrides[last.h] = {});
+  if(last.prev) o[last.key] = last.prev; else delete o[last.key];
+  save(); walk.want = last.key; const moved = cur !== last.h; cur = last.h; render(moved); walkPrompt();
+}
+function walkSkip(){ walk.want = "tee"; if(cur===18){ stopWalk(); return; } cur++; render(true); walkPrompt(); }
+function stopWalk(){
+  walk = null; hideBanner();
+  const n = Array.from({length:18},(_,i)=>i+1).filter(mapped).length;
+  toast(n===18 ? "All 18 holes mapped. Back up your data and send me the file." : `${n} of 18 holes mapped`);
+  render(true);
+}
 /* ---------- menu ---------- */
 function menuSheet(){
   const n = Array.from({length:18},(_,i)=>i+1).filter(mapped).length;
@@ -698,6 +748,7 @@ function menuSheet(){
       <button class="item" data-a="layout">Course layout <span>club map</span></button>
       <button class="item" data-a="card">Scorecard <span>${totals(S.round).thru?`thru ${totals(S.round).thru}`:"no round yet"}</span></button>
       <button class="item" data-a="stats">Rounds & stats <span>${S.rounds.length} saved</span></button>
+      <button class="item" data-a="walk">Map the course <span>guided, 2 taps a hole</span></button>
       <button class="item" data-a="edit">Edit course <span>${n} of 18 holes mapped</span></button>
       <button class="item" data-a="osm">Reload course map <span>${S.course&&S.course.fetchedAt?new Date(S.course.fetchedAt).toLocaleDateString("en-AU"):"not loaded"}</span></button>
       <button class="item" data-a="units">Distances in <span>${S.units==="m"?"metres (tap for yards)":"yards (tap for metres)"}</span></button>
@@ -713,6 +764,7 @@ function menuSheet(){
       if(a==="stats") return statsSheet();
       closeSheet();
       if(a==="edit") startEdit();
+      if(a==="walk") startWalk();
       if(a==="osm") importCourse(true);
       if(a==="units"){ S.units = S.units==="m"?"yd":"m"; save(); render(false); }
       if(a==="clear"){ S.markup[cur]=[]; save(); renderMarkup(); toast(`Hole ${cur} markup cleared`); }
