@@ -201,15 +201,35 @@ table.sc td button{width:30px;height:30px;display:inline-grid;place-items:center
 const COURSE_NAME = "The Grange";
 // Par 70 layout: par 3s on 4, 7, 10, 16 and 18, matching the club's course map.
 // Stroke index and lengths from Hole19's card (odd indexes on the back nine, the current Golf Australia layout).
-const CARD = [ // par, stroke index, card length (m)
+const CARD_YD = [ // par, stroke index, card length (yards, as printed on the Hole19 card)
   [5,4,510],[4,14,333],[4,12,343],[3,16,164],[4,10,339],[5,2,515],[3,18,154],[4,6,403],[4,8,384],
   [3,13,144],[4,5,375],[4,7,348],[4,11,305],[4,9,338],[5,1,445],[3,17,115],[4,3,390],[3,15,152]
 ];
+const CARD = CARD_YD.map(([p,si,yd]) => [p, si, Math.round(yd*0.9144)]); // lengths held in metres
 const BBOX = "-34.505,150.770,-34.440,150.840";      // search box around Kembla Grange
 const HOME = [-34.4767, 150.8075];                    // fallback view before course data loads
-// Built-in tee and green-centre positions, [lat, lng]. Filled from the guided "Map the course" pass,
-// so every hole line is drawn the moment the app opens. Your own edits on the phone still override these.
-const PRESET = {};
+// Built-in tee and green-centre positions, [lat, lng], traced from satellite imagery against the club's
+// course map, so every hole line is drawn the moment the app opens. Edits made on the phone override these.
+const PRESET = {
+  1:{tee:[-34.47705, 150.811831], gC:[-34.473552, 150.814962]},
+  2:{tee:[-34.473187, 150.815239], gC:[-34.475945, 150.814667]},
+  3:{tee:[-34.476508, 150.814777], gC:[-34.479479, 150.814088]},
+  4:{tee:[-34.479844, 150.814001], gC:[-34.479225, 150.812543]},
+  5:{tee:[-34.478901, 150.812844], gC:[-34.47634, 150.814478]},
+  6:{tee:[-34.476165, 150.814272], gC:[-34.479132, 150.811079], line:[[-34.476165, 150.814272], [-34.478802, 150.81215], [-34.479132, 150.811079]]},
+  7:{tee:[-34.478513, 150.811224], gC:[-34.479641, 150.810356]},
+  8:{tee:[-34.477889, 150.812468], gC:[-34.474784, 150.81439]},
+  9:{tee:[-34.474353, 150.814337], gC:[-34.47731, 150.812265]},
+  10:{tee:[-34.477484, 150.811716], gC:[-34.476749, 150.810442]},
+  11:{tee:[-34.478014, 150.808269], gC:[-34.479948, 150.80541]},
+  12:{tee:[-34.47957, 150.803658], gC:[-34.480413, 150.800327]},
+  13:{tee:[-34.479959, 150.799744], gC:[-34.478002, 150.801785]},
+  14:{tee:[-34.477613, 150.801591], gC:[-34.479603, 150.799342]},
+  15:{tee:[-34.480154, 150.799841], gC:[-34.478922, 150.804021]},
+  16:{tee:[-34.477963, 150.803146], gC:[-34.478028, 150.804281]},
+  17:{tee:[-34.479331, 150.805862], gC:[-34.477066, 150.808736]},
+  18:{tee:[-34.477209, 150.80942], gC:[-34.477727, 150.810876]}
+};
 const OVERPASS = ["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
 const KEY = "grange.v1";
 
@@ -302,9 +322,9 @@ async function importCourse(manual){
     S.course = Object.assign(parsed, {fetchedAt: Date.now(), osmName: (pick.tags&&pick.tags.name)||""});
     save(); drawFeatures(); render(true);
     const n = Object.keys(parsed.holes).length;
-    toast(n ? `Course map loaded: ${n} of 18 holes mapped` : "Course outline loaded, but no holes are mapped yet. Use Edit course.");
+    if(manual) toast(n ? `Map data refreshed: ${n} holes found` : "Map data refreshed");
   }catch(e){
-    if(manual || !S.course) toast("Couldn't load the course map. Check signal, or tap in holes with Edit course.");
+    if(manual) toast("Couldn't refresh map data. Check your signal.");
   }
 }
 function parseOSM(els){
