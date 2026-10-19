@@ -210,7 +210,7 @@ table.sc td button{width:30px;height:30px;display:inline-grid;place-items:center
 
 /* ---------- course card (seed; every value is editable in Edit course) ---------- */
 /* ---------- courses: each has its own card, built-in hole lines, notes, scores and rounds ---------- */
-// Card lengths are yards as printed on each club's card (held in metres inside the app).
+// Card lengths: The Grange's Hole19 card is in yards; the other three clubs' cards are in metres (metres:true).
 // Built-in hole lines are [lat, lng]: tee, optional "via" bends along the fairway, then green centre.
 const COURSES = {
   grange:{id:"grange", name:"The Grange", code:"GRG", place:"Kembla Grange", key:"grange.v1", home:[-34.4767, 150.8075], zoom:15,
@@ -239,17 +239,17 @@ const COURSES = {
   17:{tee:[-34.479331, 150.805862], gC:[-34.477066, 150.808736],via:[[-34.478732,150.806808],[-34.478456,150.80697]]},
   18:{tee:[-34.477209, 150.80942], gC:[-34.477727, 150.810876]}
 }},
-  portkembla:{id:"portkembla", name:"Port Kembla", code:"PKM", place:"Primbee · par 72", key:"grange.v1.portkembla", home:[-34.5117, 150.8782], zoom:16,
+  portkembla:{id:"portkembla", metres:true, name:"Port Kembla", code:"PKM", place:"Primbee · par 72", key:"grange.v1.portkembla", home:[-34.5117, 150.8782], zoom:16,
     bbox:"-34.520,150.868,-34.503,150.889", nameRe:/kembla/i,
     card:[[4,18,343],[4,8,348],[3,12,175],[4,3,420],[5,14,513],[4,6,332],[4,10,276],[3,1,129],[5,16,514],
           [4,5,324],[4,11,365],[3,2,154],[4,15,408],[5,7,510],[3,13,180],[4,4,323],[4,17,367],[5,9,482]],
     preset:{}},
-  links:{id:"links", name:"The Links Shell Cove", code:"LNK", place:"Shellharbour · par 71", key:"grange.v1.links", home:[-34.6025, 150.8519], zoom:16,
+  links:{id:"links", metres:true, name:"The Links Shell Cove", code:"LNK", place:"Shellharbour · par 71", key:"grange.v1.links", home:[-34.6025, 150.8519], zoom:16,
     bbox:"-34.612,150.843,-34.594,150.861", nameRe:/links|shell cove/i,
-    card:[[5,11,450],[3,13,129],[3,4,141],[4,6,318],[4,18,169],[3,14,123],[4,12,282],[5,16,427],[4,9,315],
-          [4,1,370],[3,15,136],[4,3,314],[4,5,356],[3,7,165],[4,17,271],[4,2,348],[5,8,470],[5,10,410]],
+    card:[[5,11,450],[3,13,129],[3,4,141],[4,6,318],[4,18,215],[3,14,153],[4,12,297],[5,16,440],[4,9,315],
+          [4,1,416],[3,15,136],[4,3,329],[4,5,318],[3,7,165],[4,17,271],[4,2,348],[5,8,470],[5,10,416]],
     preset:{}},
-  calderwood:{id:"calderwood", name:"Calderwood Valley", code:"CLD", place:"Calderwood · par 70", key:"grange.v1.calderwood", home:[-34.5502, 150.7246], zoom:16,
+  calderwood:{id:"calderwood", metres:true, name:"Calderwood Valley", code:"CLD", place:"Calderwood · par 70", key:"grange.v1.calderwood", home:[-34.5502, 150.7246], zoom:16,
     bbox:"-34.558,150.718,-34.543,150.733", nameRe:/calderwood/i,
     card:[[5,11,452],[4,15,268],[4,12,301],[3,16,140],[5,3,449],[3,8,148],[5,9,455],[3,14,131],[4,6,320],
           [4,17,265],[3,2,174],[5,1,466],[3,4,149],[4,18,268],[4,10,311],[4,5,320],[3,7,183],[4,13,291]],
@@ -258,7 +258,7 @@ const COURSES = {
 let ACTIVE; try{ ACTIVE = COURSES[localStorage.getItem("grange.course")]; }catch(e){}
 ACTIVE = ACTIVE || COURSES.grange;
 const COURSE_NAME = ACTIVE.name;
-const CARD = ACTIVE.card.map(([p,si,yd]) => [p, si, Math.round(yd*0.9144)]);
+const CARD = ACTIVE.card.map(([p,si,l]) => [p, si, ACTIVE.metres ? l : Math.round(l*0.9144)]);
 const BBOX = ACTIVE.bbox;
 const HOME = ACTIVE.home;
 const PRESET = ACTIVE.preset;
