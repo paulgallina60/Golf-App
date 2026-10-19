@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#10201A">
-<title>Grange Yardage</title>
+<title>Golf Yardage</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
@@ -39,6 +39,15 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gps);outline-of
 .hmeta{font-size:12.5px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .iconbtn{width:52px;background:var(--panel);border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.25);display:grid;place-items:center}
 .iconbtn svg{width:22px;height:22px}
+#courseBtn{width:50px;flex-direction:column;gap:0;padding:4px 0 2px;align-content:center}
+#courseBtn span{font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.04em;line-height:1}
+#courseBtn svg{width:16px;height:16px;margin-top:-1px}
+.crs{display:flex;width:100%;text-align:left;align-items:center;justify-content:space-between;gap:10px;padding:14px 12px;border-radius:14px;background:#E9EEE7;margin-bottom:8px}
+.crs b{font-family:var(--display);font-size:21px;font-weight:700;display:block;line-height:1.1}
+.crs small{color:var(--muted);font-size:12.5px;font-weight:500}
+.crs.on{background:var(--ink);color:var(--paper)}
+.crs.on small{color:#B9C7BD}
+.crs .pill{white-space:nowrap}
 #chips{position:fixed;top:calc(var(--sat) + 74px);left:max(12px,var(--sal));z-index:500;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 .chip{background:var(--panel);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;box-shadow:0 1px 6px rgba(0,0,0,.2);display:flex;gap:6px;align-items:center}
 .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
@@ -53,27 +62,28 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gps);outline-of
 .tool small{position:absolute;bottom:3px;left:0;right:0;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-align:center}
 
 /* banner for draw/edit modes */
-#banner{position:fixed;left:max(12px,var(--sal));right:max(12px,var(--sar));bottom:calc(var(--sab) + 196px);z-index:600;background:var(--ink);color:var(--paper);border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,.35)}
+#banner{position:fixed;left:max(12px,var(--sal));right:max(12px,var(--sar));bottom:calc(var(--sab) + 130px);z-index:600;background:var(--ink);color:var(--paper);border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,.35)}
 #banner .msg{flex:1 1 160px;min-width:0;font-size:14px;line-height:1.3}
 #banner button{background:rgba(255,255,255,.14);padding:8px 12px;border-radius:10px;font-weight:600}
 #banner button.primary{background:var(--paper);color:var(--ink)}
 
 /* bottom yardage card */
-#card{position:fixed;left:0;right:0;bottom:0;z-index:500;background:var(--panel);border-radius:20px 20px 0 0;box-shadow:0 -2px 14px rgba(0,0,0,.28);padding:12px max(16px,var(--sar)) calc(var(--sab) + 12px) max(16px,var(--sal))}
-.yards{display:grid;grid-template-columns:1fr 1.5fr 1fr;align-items:end;text-align:center;font-variant-numeric:tabular-nums}
-.yards .lab{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.yards .v{font-family:var(--display);font-weight:600;font-size:34px;line-height:1}
-.yards .c .v{font-size:64px;font-weight:700;color:var(--ink)}
+#card{position:fixed;left:0;right:0;bottom:0;z-index:500;background:var(--panel);border-radius:20px 20px 0 0;box-shadow:0 -2px 14px rgba(0,0,0,.28);padding:8px max(14px,var(--sar)) calc(var(--sab) + 8px) max(14px,var(--sal))}
+#haz:empty{display:none}
+.yards{display:grid;grid-template-columns:1fr 1.4fr 1fr;align-items:end;text-align:center;font-variant-numeric:tabular-nums}
+.yards .lab{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.yards .v{font-family:var(--display);font-weight:600;font-size:24px;line-height:1}
+.yards .c .v{font-size:44px;font-weight:700;color:var(--ink)}
 .yards .c .lab{color:var(--flag)}
 .unit{font-size:.4em;font-weight:600;color:var(--muted);margin-left:2px}
-#src{font-size:12px;color:var(--muted);text-align:center;margin-top:4px;min-height:16px}
-#haz{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:2px;scrollbar-width:none}
+#src{font-size:11.5px;color:var(--muted);text-align:center;margin-top:1px;min-height:0;line-height:1.25}
+#haz{display:flex;gap:6px;overflow-x:auto;margin-top:6px;padding-bottom:2px;scrollbar-width:none}
 #haz::-webkit-scrollbar{display:none}
 .hz{flex:0 0 auto;border:1px solid var(--line);border-radius:10px;padding:5px 9px;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .hz b{font-weight:700}
 .hz i{font-style:normal;display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:1px}
-.cardrow{display:flex;gap:8px;margin-top:10px}
-.cardrow button{flex:1;padding:12px 8px;border-radius:12px;background:#E7ECE5;font-weight:700;font-size:15px}
+.cardrow{display:flex;gap:6px;margin-top:6px}
+.cardrow button{flex:1;padding:7px 8px;border-radius:10px;background:#E7ECE5;font-weight:700;font-size:14px}
 .cardrow button.score{background:var(--ink);color:var(--paper);flex:1.4}
 .empty{font-size:13.5px;color:var(--muted);text-align:center;padding:4px 0 2px;line-height:1.4}
 
@@ -135,7 +145,7 @@ table.sc td button{width:30px;height:30px;display:inline-grid;place-items:center
 .markm{width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:3px;background:#fff;border:3px solid var(--flag);transform:rotate(45deg)}
 .leaflet-popup-content{font-family:var(--body);font-size:14px;margin:10px 12px}
 .leaflet-popup-content button{margin-top:8px;padding:6px 10px;border-radius:8px;background:#F6DEDA;color:#8E2416;font-weight:700}
-.leaflet-control-attribution{font-size:9px!important;margin-bottom:calc(var(--sab) + 190px)!important}
+.leaflet-control-attribution{font-size:9px!important;margin-bottom:calc(var(--sab) + 120px)!important}
 
 .layout{position:relative;border-radius:12px;overflow:hidden;background:#fff;border:1px solid var(--line)}
 .layout img{display:block;width:100%;height:auto}
@@ -152,6 +162,7 @@ table.sc td button{width:30px;height:30px;display:inline-grid;place-items:center
 <div id="map" aria-label="Course map"></div>
 
 <div id="top">
+  <button class="iconbtn" id="courseBtn" aria-label="Choose course"><span id="courseCode">GRG</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg></button>
   <div class="hbar">
     <button class="arrow" id="prevH" aria-label="Previous hole">‹</button>
     <div class="hmid"><div class="hnum">Hole <span id="hNum">1</span></div><div class="hmeta" id="hMeta"></div></div>
@@ -198,19 +209,17 @@ table.sc td button{width:30px;height:30px;display:inline-grid;place-items:center
 "use strict";
 
 /* ---------- course card (seed; every value is editable in Edit course) ---------- */
-const COURSE_NAME = "The Grange";
-// Par 70 layout: par 3s on 4, 7, 10, 16 and 18, matching the club's course map.
-// Stroke index and lengths from Hole19's card (odd indexes on the back nine, the current Golf Australia layout).
-const CARD_YD = [ // par, stroke index, card length (yards, as printed on the Hole19 card)
+/* ---------- courses: each has its own card, built-in hole lines, notes, scores and rounds ---------- */
+// Card lengths are yards as printed on each club's card (held in metres inside the app).
+// Built-in hole lines are [lat, lng]: tee, optional "via" bends along the fairway, then green centre.
+const COURSES = {
+  grange:{id:"grange", name:"The Grange", code:"GRG", place:"Kembla Grange", key:"grange.v1", home:[-34.4767, 150.8075], zoom:15,
+    bbox:"-34.505,150.770,-34.440,150.840", nameRe:/grange/i, layout:true,
+    card:[ // par, stroke index, card length (yards, as printed on the Hole19 card)
   [5,4,510],[4,14,333],[4,12,343],[3,16,164],[4,10,339],[5,2,515],[3,18,154],[4,6,403],[4,8,384],
   [3,13,144],[4,5,375],[4,7,348],[4,11,305],[4,9,338],[5,1,445],[3,17,115],[4,3,390],[3,15,152]
-];
-const CARD = CARD_YD.map(([p,si,yd]) => [p, si, Math.round(yd*0.9144)]); // lengths held in metres
-const BBOX = "-34.505,150.770,-34.440,150.840";      // search box around Kembla Grange
-const HOME = [-34.4767, 150.8075];                    // fallback view before course data loads
-// Built-in tee and green-centre positions, [lat, lng], traced from satellite imagery against the club's
-// course map, so every hole line is drawn the moment the app opens. Edits made on the phone override these.
-const PRESET = {
+],
+    preset:{
   1:{tee:[-34.477147, 150.81185], gC:[-34.473556, 150.814809],via:[[-34.47554,150.812539],[-34.474036,150.814127]]},
   2:{tee:[-34.473187, 150.815239], gC:[-34.475945, 150.814667],via:[[-34.474323,150.814995],[-34.474814,150.814984],[-34.475238,150.814786]]},
   3:{tee:[-34.476508, 150.814777], gC:[-34.479479, 150.814088],via:[[-34.476763,150.814773],[-34.478261,150.814181],[-34.479403,150.814179]]},
@@ -229,13 +238,37 @@ const PRESET = {
   16:{tee:[-34.477963, 150.803146], gC:[-34.478028, 150.804281],via:[[-34.477968,150.803449],[-34.478065,150.803608]]},
   17:{tee:[-34.479331, 150.805862], gC:[-34.477066, 150.808736],via:[[-34.478732,150.806808],[-34.478456,150.80697]]},
   18:{tee:[-34.477209, 150.80942], gC:[-34.477727, 150.810876]}
+}},
+  portkembla:{id:"portkembla", name:"Port Kembla", code:"PKM", place:"Primbee · par 72", key:"grange.v1.portkembla", home:[-34.5117, 150.8782], zoom:16,
+    bbox:"-34.520,150.868,-34.503,150.889", nameRe:/kembla/i,
+    card:[[4,18,343],[4,8,348],[3,12,175],[4,3,420],[5,14,513],[4,6,332],[4,10,276],[3,1,129],[5,16,514],
+          [4,5,324],[4,11,365],[3,2,154],[4,15,408],[5,7,510],[3,13,180],[4,4,323],[4,17,367],[5,9,482]],
+    preset:{}},
+  links:{id:"links", name:"The Links Shell Cove", code:"LNK", place:"Shellharbour · par 71", key:"grange.v1.links", home:[-34.6025, 150.8519], zoom:16,
+    bbox:"-34.612,150.843,-34.594,150.861", nameRe:/links|shell cove/i,
+    card:[[5,11,450],[3,13,129],[3,4,141],[4,6,318],[4,18,169],[3,14,123],[4,12,282],[5,16,427],[4,9,315],
+          [4,1,370],[3,15,136],[4,3,314],[4,5,356],[3,7,165],[4,17,271],[4,2,348],[5,8,470],[5,10,410]],
+    preset:{}},
+  calderwood:{id:"calderwood", name:"Calderwood Valley", code:"CLD", place:"Calderwood · par 70", key:"grange.v1.calderwood", home:[-34.5502, 150.7246], zoom:16,
+    bbox:"-34.558,150.718,-34.543,150.733", nameRe:/calderwood/i,
+    card:[[5,11,452],[4,15,268],[4,12,301],[3,16,140],[5,3,449],[3,8,148],[5,9,455],[3,14,131],[4,6,320],
+          [4,17,265],[3,2,174],[5,1,466],[3,4,149],[4,18,268],[4,10,311],[4,5,320],[3,7,183],[4,13,291]],
+    preset:{}}
 };
+let ACTIVE; try{ ACTIVE = COURSES[localStorage.getItem("grange.course")]; }catch(e){}
+ACTIVE = ACTIVE || COURSES.grange;
+const COURSE_NAME = ACTIVE.name;
+const CARD = ACTIVE.card.map(([p,si,yd]) => [p, si, Math.round(yd*0.9144)]);
+const BBOX = ACTIVE.bbox;
+const HOME = ACTIVE.home;
+const PRESET = ACTIVE.preset;
 const OVERPASS = ["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
-const KEY = "grange.v1";
+const KEY = ACTIVE.key;
 
 /* ---------- state ---------- */
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
 const S = Object.assign({course:null, overrides:{}, markup:{}, round:null, rounds:[], units:"m", lastHole:1}, load()||{});
+try{ const gu = localStorage.getItem("grange.units"); if(gu) S.units = gu; }catch(e){}
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Couldn't save on this phone"); } }
 
 let cur = Math.min(18, Math.max(1, S.lastHole||1));
@@ -278,7 +311,7 @@ function hole(h){
 function mapped(h){ const H=hole(h); return !!(H.tee && H.gC); }
 
 /* ---------- map ---------- */
-const map = L.map("map", {zoomControl:false, attributionControl:true, maxZoom:21}).setView(HOME, 15);
+const map = L.map("map", {zoomControl:false, attributionControl:true, maxZoom:21}).setView(HOME, ACTIVE.zoom||15);
 L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
   {maxNativeZoom:19, maxZoom:21, attribution:"Imagery © Esri · Course data © OpenStreetMap"}).addTo(map);
 const featLayer = L.layerGroup().addTo(map), holeLayer = L.layerGroup().addTo(map), markLayer = L.layerGroup().addTo(map),
@@ -314,7 +347,7 @@ async function importCourse(manual){
     const found = await overpass(`[out:json][timeout:25];(way["leisure"="golf_course"](${BBOX});relation["leisure"="golf_course"](${BBOX}););out tags center;`);
     const els = found.elements || [];
     if(!els.length) throw new Error("none");
-    const pick = els.find(e => /grange/i.test((e.tags&&e.tags.name)||"")) || (els.length===1 ? els[0] : null);
+    const pick = els.find(e => ACTIVE.nameRe.test((e.tags&&e.tags.name)||"")) || (els.length===1 ? els[0] : null);
     if(!pick) throw new Error("ambiguous");
     const q = `[out:json][timeout:30];${pick.type}(${pick.id});map_to_area->.a;(way(area.a)["golf"];relation(area.a)["golf"];way(area.a)["natural"="water"];);out geom;`;
     const data = await overpass(q);
@@ -393,7 +426,7 @@ function render(fit){
 
 function fitHole(){
   const H = hole(cur), pts = [H.tee, H.gF, H.gC, H.gB].filter(Boolean);
-  const pad = {paddingTopLeft:[30, 90], paddingBottomRight:[80, 230], maxZoom:19};
+  const pad = {paddingTopLeft:[30, 90], paddingBottomRight:[80, 150], maxZoom:19};
   if(pts.length >= 2) map.fitBounds(L.latLngBounds(pts), pad);
   else if(pts.length === 1) map.setView(pts[0], 18);
   else { const F = (S.course&&S.course.features)||[]; if(F.length) map.fitBounds(L.latLngBounds(F.flatMap(f=>f.pts)), pad); }
@@ -407,7 +440,7 @@ function update(){
   $("#dB").innerHTML = (m && H.gB) ? fmt(dist(m,H.gB)) : "—";
 
   let src = "";
-  if(!mapped(cur)) src = "This hole isn't mapped yet. Menu → Edit course to tap in the tee and green.";
+  if(!mapped(cur)) src = "This hole isn't mapped yet. Menu → Map the course to tap in tee and green.";
   else if(gps) src = "From your position";
   else src = "No GPS fix yet, measuring from the tee";
   const shot = lastShot();
@@ -718,6 +751,7 @@ const MAP_IMG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAbgBuAAD/2wBDAAkGBwgH
 const MAP_POS = {1:[0.810,0.386],2:[0.936,0.338],3:[0.891,0.685],4:[0.839,0.821],5:[0.872,0.644],6:[0.827,0.665],7:[0.705,0.767],8:[0.863,0.477],9:[0.825,0.483],10:[0.701,0.575],11:[0.503,0.758],12:[0.155,0.872],13:[0.161,0.721],14:[0.074,0.721],15:[0.165,0.792],16:[0.327,0.721],17:[0.481,0.709],18:[0.659,0.614]};
 function layoutSheet(){
   const p = MAP_POS[cur];
+  if(!ACTIVE.layout) return;
   openSheet(`<h2>Course layout · hole ${cur}</h2>
     <div class="layout"><img src="${MAP_IMG}" alt="The Grange course layout">${p?`<span class="ring" style="left:${p[0]*100}%;top:${p[1]*100}%"></span>`:""}</div>
     <p class="note">The club's own map, for routing between holes. The ring marks hole ${cur}. Distances come from the satellite view, not this picture.</p>
@@ -734,8 +768,8 @@ function startWalk(){
   cur = 1; render(true); walkPrompt();
 }
 function walkPrompt(){
-  const p = MAP_POS[cur];
-  const inset = `<span class="inset"><img src="${MAP_IMG}" alt="">${p?`<i style="left:${p[0]*100}%;top:${p[1]*100}%"></i>`:""}</span>`;
+  const p = ACTIVE.layout ? MAP_POS[cur] : null;
+  const inset = !p ? "" : `<span class="inset"><img src="${MAP_IMG}" alt="">${p?`<i style="left:${p[0]*100}%;top:${p[1]*100}%"></i>`:""}</span>`;
   showBanner("", [["Undo",walkUndo],["Skip",walkSkip],["Finish",stopWalk,true]]);
   $("#bannerMsg").innerHTML = `${inset}<b>Hole ${cur} of 18</b><br>Tap the ${walk.want==="tee"?"<b>tee</b> (the tee you play from)":"<b>middle of the green</b>"}. Zoom in for accuracy.`;
 }
@@ -760,12 +794,26 @@ function stopWalk(){
   toast(n===18 ? "All 18 holes mapped. Back up your data and send me the file." : `${n} of 18 holes mapped`);
   render(true);
 }
+/* ---------- course selector ---------- */
+function courseSheet(){
+  const mappedN = c => { let n=0; for(let h=1;h<=18;h++){ const p=c.preset[h]; if(p && p.tee && p.gC) n++; } return n; };
+  openSheet(`<h2>Choose course</h2>` + Object.values(COURSES).map(c => {
+    const n = c.id===ACTIVE.id ? Array.from({length:18},(_,i)=>i+1).filter(mapped).length : mappedN(c);
+    return `<button class="crs${c.id===ACTIVE.id?" on":""}" data-c="${c.id}"><span><b>${esc(c.name)}</b><small>${esc(c.place)}</small></span><span class="pill${n===18?" good":""}">${n===18?"all 18 mapped":n+" of 18 mapped"}</span></button>`;
+  }).join("") + `<p class="note">Each course keeps its own scores, rounds, notes and edits.</p>`, root => {
+    on(root, "[data-c]", e => { const id = e.currentTarget.dataset.c; if(id===ACTIVE.id) return closeSheet();
+      save(); try{ localStorage.setItem("grange.course", id); }catch(err){} location.reload(); });
+  });
+}
+$("#courseBtn").addEventListener("click", courseSheet);
+$("#courseCode").textContent = ACTIVE.code; document.title = ACTIVE.name;
+
 /* ---------- menu ---------- */
 function menuSheet(){
   const n = Array.from({length:18},(_,i)=>i+1).filter(mapped).length;
   openSheet(`<h2>${COURSE_NAME}</h2>
     <div class="list">
-      <button class="item" data-a="layout">Course layout <span>club map</span></button>
+      ${ACTIVE.layout?`<button class="item" data-a="layout">Course layout <span>club map</span></button>`:""}
       <button class="item" data-a="card">Scorecard <span>${totals(S.round).thru?`thru ${totals(S.round).thru}`:"no round yet"}</span></button>
       <button class="item" data-a="stats">Rounds & stats <span>${S.rounds.length} saved</span></button>
       <button class="item" data-a="walk">Map the course <span>guided, 2 taps a hole</span></button>
@@ -786,7 +834,7 @@ function menuSheet(){
       if(a==="edit") startEdit();
       if(a==="walk") startWalk();
       if(a==="osm") importCourse(true);
-      if(a==="units"){ S.units = S.units==="m"?"yd":"m"; save(); render(false); }
+      if(a==="units"){ S.units = S.units==="m"?"yd":"m"; try{ localStorage.setItem("grange.units", S.units); }catch(e){} save(); render(false); }
       if(a==="clear"){ S.markup[cur]=[]; save(); renderMarkup(); toast(`Hole ${cur} markup cleared`); }
       if(a==="export") exportData();
       if(a==="import") $("#importFile").click();
@@ -796,7 +844,7 @@ function menuSheet(){
 function exportData(){
   const blob = new Blob([JSON.stringify(S, null, 1)], {type:"application/json"});
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-  a.download = `grange-golf-${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click();
+  a.download = `golf-${ACTIVE.id}-${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 $("#importFile").addEventListener("change", e => {
@@ -804,7 +852,7 @@ $("#importFile").addEventListener("change", e => {
   const rd = new FileReader();
   rd.onload = () => { try{ const d = JSON.parse(rd.result); if(!d || typeof d!=="object" || !("overrides" in d)) throw 0;
       Object.keys(S).forEach(k=>delete S[k]); Object.assign(S, {course:null, overrides:{}, markup:{}, round:null, rounds:[], units:"m", lastHole:1}, d);
-      save(); drawFeatures(); render(true); toast("Backup restored"); }catch(err){ toast("That file isn't a Grange Yardage backup"); } };
+      save(); drawFeatures(); render(true); toast("Backup restored"); }catch(err){ toast("That file isn't a Golf Yardage backup"); } };
   rd.readAsText(f); e.target.value = "";
 });
 
@@ -816,9 +864,10 @@ $("#menuBtn").addEventListener("click", menuSheet);
 $("#scoreBtn").addEventListener("click", scoreSheet);
 $("#cardBtn").addEventListener("click", cardSheet);
 $("#layoutBtn").addEventListener("click", layoutSheet);
+if(!ACTIVE.layout) $("#layoutBtn").hidden = true;
 $("#fitBtn").addEventListener("click", () => {
   const H = hole(cur);
-  if(gps && H.gC) map.fitBounds(L.latLngBounds([gps, H.gC]), {paddingTopLeft:[30,90], paddingBottomRight:[80,230], maxZoom:19});
+  if(gps && H.gC) map.fitBounds(L.latLngBounds([gps, H.gC]), {paddingTopLeft:[30,90], paddingBottomRight:[80,150], maxZoom:19});
   else if(gps) map.setView(gps, 18); else fitHole();
 });
 
