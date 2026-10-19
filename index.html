@@ -268,7 +268,7 @@ const KEY = ACTIVE.key;
 /* ---------- state ---------- */
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
 const S = Object.assign({course:null, overrides:{}, markup:{}, round:null, rounds:[], units:"m", lastHole:1}, load()||{});
-try{ const gu = localStorage.getItem("grange.units"); if(gu) S.units = gu; }catch(e){}
+S.units = "m"; // metres only
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Couldn't save on this phone"); } }
 
 let cur = Math.min(18, Math.max(1, S.lastHole||1));
@@ -294,7 +294,7 @@ function inPoly(p, poly){ let c=false; for(let i=0,j=poly.length-1;i<poly.length
 function pathLen(pts){ let d=0; for(let i=1;i<pts.length;i++) d+=dist(pts[i-1],pts[i]); return d; }
 
 /* ---------- units ---------- */
-const conv = d => S.units==="yd" ? d*1.09361 : d;
+const conv = d => d;
 const fmt = d => (d==null || !isFinite(d)) ? "—" : String(Math.round(conv(d)));
 const u = () => S.units;
 
@@ -819,7 +819,6 @@ function menuSheet(){
       <button class="item" data-a="walk">Map the course <span>guided, 2 taps a hole</span></button>
       <button class="item" data-a="edit">Edit course <span>${n} of 18 holes mapped</span></button>
       <button class="item" data-a="osm">Reload course map <span>${S.course&&S.course.fetchedAt?new Date(S.course.fetchedAt).toLocaleDateString("en-AU"):"not loaded"}</span></button>
-      <button class="item" data-a="units">Distances in <span>${S.units==="m"?"metres (tap for yards)":"yards (tap for metres)"}</span></button>
       <button class="item" data-a="clear">Clear notes and lines on hole ${cur} <span>${(S.markup[cur]||[]).length} items</span></button>
       <button class="item" data-a="export">Back up my data <span>.json file</span></button>
       <button class="item" data-a="import">Restore from backup <span>.json file</span></button>
