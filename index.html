@@ -150,7 +150,8 @@ table.sc td button{width:30px;height:30px;display:inline-grid;place-items:center
 .layout{position:relative;border-radius:12px;overflow:hidden;background:#fff;border:1px solid var(--line)}
 .layout img{display:block;width:100%;height:auto}
 .layout .ring{position:absolute;width:13%;aspect-ratio:1;max-width:100%;border:3px solid var(--flag);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(255,255,255,.85);pointer-events:none}
-.hlab{display:inline-block;transform:translate(-50%,-50%);background:rgba(16,32,26,.8);color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;line-height:20px;text-align:center;border-radius:50%}
+.holehit{cursor:pointer}
+.hlab{cursor:pointer;display:inline-block;transform:translate(-50%,-50%);background:rgba(16,32,26,.8);color:#fff;font-weight:700;font-size:12px;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%}
 .inset{float:right;position:relative;width:110px;margin:0 0 4px 10px;border-radius:8px;overflow:hidden;background:#fff}
 .inset img{display:block;width:100%}
 .inset i{position:absolute;width:20px;height:20px;border:2px solid var(--flag);border-radius:50%;transform:translate(-50%,-50%)}
@@ -468,7 +469,10 @@ function render(fit){
     if(h===cur) continue; const O = hole(h); if(!(O.tee && O.gC)) continue;
     const ln = (O.line && O.line.length>1) ? O.line : [O.tee, O.gC];
     L.polyline(ln, {color:"#fff", weight:1.5, opacity:.4, interactive:false}).addTo(holeLayer);
-    L.marker(O.tee, {icon:L.divIcon({className:"", html:`<span class="hlab">${h}</span>`, iconSize:null}), interactive:false, keyboard:false}).addTo(holeLayer);
+    // tap another hole's line or number to jump to it (measure mode only, so drawing and editing aren't hijacked)
+    const pick = e => { if(e && e.originalEvent) L.DomEvent.stopPropagation(e); if(walk || editing || mode!=="measure") return; cur = h; target = null; render(true); };
+    L.polyline(ln, {color:"#fff", weight:20, opacity:0, interactive:true, bubblingMouseEvents:false, className:"holehit"}).on("click", pick).addTo(holeLayer);
+    L.marker(O.tee, {icon:L.divIcon({className:"", html:`<span class="hlab">${h}</span>`, iconSize:null}), interactive:true, bubblingMouseEvents:false, keyboard:false}).on("click", pick).addTo(holeLayer);
   }
   if(H.tee && H.gC) L.polyline((H.line && H.line.length>1) ? H.line : [H.tee, H.gC], {color:"#fff", weight:2.5, opacity:.9, interactive:false}).addTo(holeLayer);
   if(H.tee) L.marker(H.tee, {icon:icon("teem"), interactive:false}).addTo(holeLayer);
